@@ -21,6 +21,15 @@ import (
 	"time"
 )
 
+var (
+	DefaultDialer                      = &net.Dialer{Timeout: 1000 * time.Millisecond}
+	DefaultTransport http.RoundTripper = &http.Transport{Dial: DefaultDialer.Dial, Proxy: http.ProxyFromEnvironment, TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+	DefaultClient                      = &http.Client{Transport: DefaultTransport}
+
+	proxyTransport http.RoundTripper
+	proxyClient    *http.Client
+)
+
 type itimeout interface {
 	Timeout() bool
 }
@@ -239,13 +248,6 @@ func prepareRequestBody(b interface{}) (io.Reader, error) {
 		return nil, err
 	}
 }
-
-var DefaultDialer = &net.Dialer{Timeout: 1000 * time.Millisecond}
-var DefaultTransport http.RoundTripper = &http.Transport{Dial: DefaultDialer.Dial, Proxy: http.ProxyFromEnvironment}
-var DefaultClient = &http.Client{Transport: DefaultTransport}
-
-var proxyTransport http.RoundTripper
-var proxyClient *http.Client
 
 func SetConnectTimeout(duration time.Duration) {
 	DefaultDialer.Timeout = duration
